@@ -1,0 +1,6 @@
+nonebot2 >= 2.4.2
+fastapi <= 0.115.12
+nonebot-adapter-onebot >= 2.4.6
+
+
+openai >= 1.69.0
