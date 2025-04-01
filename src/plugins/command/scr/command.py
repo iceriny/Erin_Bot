@@ -127,12 +127,11 @@ class CommandStrategy:
             await cmd.send("请在群组内使用该命令")
             return
 
-        user_name = cmd.data.
-        user_nike = cmd.data.member.nick if cmd.data.member else user_name
+        user_nike = cmd.data.sender.nickname
         user_name = (
-            user_name
-            if user_name
-            else user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
+            user_nike
+            if user_nike
+            else f"Q号: {cmd.data.get_user_id()}"
         )
         result = TortureGame.command_handler(
             command=cmd.guide,
