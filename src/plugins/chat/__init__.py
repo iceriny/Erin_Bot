@@ -1,4 +1,5 @@
 from nonebot.plugin import PluginMetadata
+from nonebot.rule import Rule
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from nonebot import get_plugin_config, on_command, on_message, get_driver
@@ -7,6 +8,7 @@ from typing import Dict, Any
 
 from src.plugins.chat.chat import Chat
 from src.plugins.chat.config import Config
+from src.utilities.MessageUtilities import is_group_message, is_private_message
 
 
 __plugin_meta__ = PluginMetadata(
@@ -17,7 +19,14 @@ __plugin_meta__ = PluginMetadata(
 )
 config = get_plugin_config(Config)
 
-message_matcher = on_message(priority=config.priority, block=False)
+
+async def is_tome(event: MessageEvent) -> bool:
+    if is_group_message(event):
+        return event.is_tome()
+    return is_private_message(event)
+
+
+message_matcher = on_message(priority=config.priority, block=False, rule=is_tome)
 command_matcher = on_command("ai", priority=config.command_priority, block=True)
 
 # 保存正在处理的会话状态
@@ -55,14 +64,15 @@ async def on_task_error(session_id: str, task_id: str, error: str):
 
 @message_matcher.handle()
 async def handle_receive(event: MessageEvent):
+
     text = event.get_plaintext()
-    user = event.get_session_id()
+    session_id = event.get_session_id()
 
     # 记录会话开始
-    if user not in active_sessions:
-        active_sessions[user] = {"status": "new"}
+    if session_id not in active_sessions:
+        active_sessions[session_id] = {"status": "new"}
 
-    chat = Chat.get_session(user)["chat"]
+    chat = Chat.get_session(session_id)["chat"]
     return_text = None
 
     try:
@@ -79,8 +89,8 @@ async def handle_receive(event: MessageEvent):
         return_text = f"处理消息出错: {str(e)}"
 
     # 清理会话状态
-    if user in active_sessions:
-        del active_sessions[user]
+    if session_id in active_sessions:
+        del active_sessions[session_id]
     logger.info(f"返回消息: {return_text}")
     await message_matcher.finish(return_text)
 
