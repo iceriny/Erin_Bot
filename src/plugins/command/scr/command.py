@@ -128,7 +128,7 @@ class CommandStrategy:
             await cmd.send(
                 Message()
                 + MessageSegment.at(cmd.data.get_user_id())
-                + f"\n你的掷点结果是：{DiceAction(dices).result}"
+                + f"你的掷点结果是：{DiceAction(dices).result}"
             )
         else:
             await cmd.send(MessageSegment.text("请输入掷点指令，如：/d 2d6+3"))

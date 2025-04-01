@@ -26,8 +26,8 @@ async def is_tome(event: MessageEvent) -> bool:
     return is_private_message(event)
 
 
-message_matcher = on_message(priority=config.priority, block=False, rule=is_tome)
 command_matcher = on_command("ai", priority=config.command_priority, block=True)
+message_matcher = on_message(priority=config.priority, block=False, rule=is_tome)
 
 # 保存正在处理的会话状态
 active_sessions: Dict[str, Dict[str, Any]] = {}

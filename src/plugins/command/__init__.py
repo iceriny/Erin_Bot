@@ -23,7 +23,7 @@ key_set = [key for key in CommandStrategy.Command_Map.keys()]
 for c in CommandStrategy.Command_Map.values():
     key_set += list(c["tags"])
 command_matcher = on_command(
-    "cmd", aliases={v for v in key_set}, priority=config.command_priority
+    "cmd", aliases={v for v in key_set}, priority=config.command_priority, block=True
 )
 
 
