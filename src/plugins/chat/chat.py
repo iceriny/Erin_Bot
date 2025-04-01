@@ -2,9 +2,14 @@ import time
 import asyncio
 from typing import TypedDict, Dict, List, Callable, Awaitable, Literal, Any
 from openai import AsyncOpenAI
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 import nonebot
 from nonebot.log import logger
+
+from nonebot import require
+
+require("nonebot_plugin_apscheduler")
+
+from nonebot_plugin_apscheduler import scheduler
 
 
 class ChatEvent:
@@ -188,3 +193,10 @@ class Chat:
 - 你和ai对话时,如果前缀`system:`, 则发送给ai`system` role 的信息, 一般用作提示词, 默认不会直接发送
 - 如果你在发送`system`信息时, 后缀了符号:"$", 则将system直接发给ai,ai会有对应的回复
 """
+
+
+@scheduler.scheduled_job("cron", hour="*/2", id="regular_chat_cleaning")
+async def regular_cleaning():
+    nonebot.logger.info("定期清理聊天会话...")
+    Chat.clean_expired_session()
+    nonebot.logger.info("清理完成")
