@@ -67,7 +67,11 @@ async def handle_receive(event: MessageEvent):
     text = event.get_plaintext()
     nike_name = event.sender.nickname if event.sender.nickname else event.get_user_id()
     if is_group_message(event):
-        chat_type = "private" if text.startswith("%") else "group"
+        if text.startswith("%"):
+            chat_type = "private"
+            text = text[1:]
+        else:
+            chat_type = "group"
         session_id = (
             event.get_user_id() if chat_type == "private" else str(event.group_id)
         )
