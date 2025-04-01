@@ -3,3 +3,7 @@ bin/
 lib/
 lib64
 pyvenv.cfg
+/data/currency.dict
+.vscode
+__pycache__/
+*.coffee
