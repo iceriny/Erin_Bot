@@ -1,5 +1,5 @@
 import nonebot
-from nonebot.adapters.onebot.v12 import Adapter
+from nonebot.adapters.onebot.v11 import Adapter
 
 nonebot.init()
 
