@@ -1,6 +1,7 @@
 nonebot2 >= 2.4.2
 fastapi <= 0.115.12
 nonebot-adapter-onebot >= 2.4.6
+nonebot-plugin-apscheduler >= 0.5.0
 simpleeval >= 1.0.3
 forexrateapi >= 1.1.2
 chinese_calendar >= 1.10.0
