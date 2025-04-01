@@ -1,7 +1,7 @@
 import re
 from typing import Any, TypedDict, Union
-from erin.plugins.dice.dice import DiceAction, Dice
-from erin.plugins.command.scr.CMDResult import CMDResult
+from src.plugins.dice.dice import DiceAction, Dice
+from src.plugins.command.scr.CMDResult import CMDResult
 
 
 class DiceGamePlayer(TypedDict):
@@ -140,12 +140,12 @@ class TortureGame:
                 return CMDResult("请指定要踢出的玩家(At他/她)")
             for at in at_list:
                 if at["id"] not in game.players.keys():
-                    return CMDResult(f"{at["name"]}都没参加游戏你踢别人干嘛?")
+                    return CMDResult(f"{at['name']}都没参加游戏你踢别人干嘛?")
                 if not at["id"]:
                     return CMDResult("发生了点问题，联系管理员吧~")
                 game.remove_player(at["id"])
             return CMDResult(
-                f"{"、".join([player["name"] if player["name"] else "未知名称" for player in at_list])} 被踢出游戏。当前游戏人数: {len(game.players)}"
+                f"{'、'.join([player['name'] if player['name'] else '未知名称' for player in at_list])} 被踢出游戏。当前游戏人数: {len(game.players)}"
             )
         elif command == "开始":
             if not game:

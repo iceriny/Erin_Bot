@@ -6,3 +6,4 @@ pyvenv.cfg
 /data/currency.dict
 .vscode
 __pycache__/
+*.coffee

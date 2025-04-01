@@ -2,8 +2,6 @@ import json
 from typing import TypedDict, Literal
 import datetime
 
-from icecream import ic
-
 
 import chinese_calendar as calendar
 from chinese_calendar.constants import Holiday
@@ -20,7 +18,7 @@ from chinese_calendar.constants import Holiday
 #     sys.path.remove(path)
 # else:
 #     from erin.utilities.DateParser import DateParser
-from erin.utilities.DateParser import DateParser
+from src.utilities.DateParser import DateParser
 
 Holiday_Name = {
     Holiday.new_years_day.value: "元旦",
@@ -92,7 +90,6 @@ class HolidayCalculation:
         date_value, date_name = cls.__get_holiday(date, including_weekends)
         if date_value is None:
             including_current = True
-        ic(date_value, date_name, _later)
         if date_value is None:
             _later += 1
             date += datetime.timedelta(days=1)
@@ -179,9 +176,16 @@ class HolidayCalculation:
             return return_text
 
     @classmethod
-    def get_holiday_tips(cls, date_str: str | None = None, including_weekends=False, including_current=False):
+    def get_holiday_tips(
+        cls,
+        date_str: str | None = None,
+        including_weekends=False,
+        including_current=False,
+    ):
         previous_holiday = cls.get_previous_holiday(date_str, including_weekends)
-        next_holiday = cls.get_next_holiday(date_str, including_weekends, including_current)
+        next_holiday = cls.get_next_holiday(
+            date_str, including_weekends, including_current
+        )
 
         result = (
             f"{previous_holiday}\n{next_holiday}"

@@ -1,12 +1,11 @@
 import random
-from typing import Literal, Self, Union, Callable, TypedDict
-from erin.plugins.command.scr.CMDResult import CMDResult
-from icecream import ic
+from typing import Literal, Self, Union, Callable, TypedDict, Any, cast
+from src.plugins.command.scr.CMDResult import CMDResult
 
 
 class Profession(TypedDict):
     desc: str
-    skill: Callable[[Self, "BombDisposalGame", str | None], str]
+    skill: Callable[["Bomb_disposal_player", "BombDisposalGame", str | None], str]
 
 
 class Bomb_disposal_player:
@@ -425,7 +424,7 @@ class BombDisposalGame:
                 return CMDResult("请指定要踢出的玩家(At他/她)")
             for at in at_list:
                 if at["id"] not in [player.id for player in game.players_list]:
-                    return CMDResult(f"{at["name"]}都没参加游戏你踢别人干嘛?")
+                    return CMDResult(f"{at['name']}都没参加游戏你踢别人干嘛?")
                 game.remove_player(at["id"])
             return CMDResult(
                 (f"{'、'.join([player['name'] if player['name'] else '未知名称' for player in at_list])} 被踢出游戏。\n"

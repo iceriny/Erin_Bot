@@ -1,8 +1,8 @@
 import random
 from typing import TypedDict, Union
 
-from erin.plugins.command.scr.CMDResult import CMDResult
-from erin.plugins.dice.dice import DiceAction
+from src.plugins.command.scr.CMDResult import CMDResult
+from src.plugins.dice.dice import DiceAction
 
 
 class RouletteGamePlayer(TypedDict):
@@ -157,10 +157,10 @@ class RouletteGame:
                 return CMDResult("请指定要踢出的玩家(At他/她)")
             for at in at_list:
                 if at["id"] not in [player["id"] for player in game.players_list]:
-                    return CMDResult(f"{at["name"]}都没参加游戏你踢别人干嘛?")
+                    return CMDResult(f"{at['name']}都没参加游戏你踢别人干嘛?")
                 game.remove_player(at["id"])
             return CMDResult(
-                f"{"、".join([player["name"] if player["name"] else "未知名称" for player in at_list])} 被踢出游戏。当前游戏人数: {len(game.players_list)}"
+                f"{'、'.join([player['name'] if player['name'] else '未知名称' for player in at_list])} 被踢出游戏。当前游戏人数: {len(game.players_list)}"
             )
         elif command == "离开":
             if not game:

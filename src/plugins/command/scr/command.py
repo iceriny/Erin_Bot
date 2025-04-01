@@ -1,7 +1,11 @@
 import re
 from html import escape, unescape
 
-from nonebot.adapters.onebot.v11.event import MessageEvent
+from nonebot.adapters.onebot.v11.event import (
+    MessageEvent,
+    GroupMessageEvent,
+    PrivateMessageEvent,
+)
 from nonebot.adapters.onebot.v11.message import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import Bot
 
@@ -15,12 +19,21 @@ from src.plugins.mini_game.torture_game import TortureGame
 from src.plugins.mini_game.russian_roulette_game import RouletteGame
 from src.plugins.mini_game.bomb_disposal_game import BombDisposalGame
 from src.plugins.command.scr.CMDResult import CMDResult
-from typing import Callable, Any, TypedDict
+from typing import Callable, Any, TypedDict, Generic, TypeVar, TypeGuard, Union
 
 
+T = TypeVar("T", bound=MessageEvent)
 
 
-class Command:
+def is_group_message(cmd: "Command") -> TypeGuard["Command[GroupMessageEvent]"]:
+    return cmd.data.message_type == "group"
+
+
+def is_private_message(cmd: "Command") -> TypeGuard["Command[PrivateMessageEvent]"]:
+    return cmd.data.message_type == "private"
+
+
+class Command(Generic[T]):
     Command_Pattern = r"^/(\w+)(?:@(\w+))?(?: (.+))?$"
 
     def get_args(self, message: str):
@@ -41,7 +54,7 @@ class Command:
             args = args.split() if args else []
             return command, guide, args, _pure
 
-    def __init__(self, bot: Bot, data: MessageEvent) -> None:
+    def __init__(self, bot: Bot, data: T) -> None:
         self.bot = bot
         self.data = data
         self.command, self.guide, self.args, self.pure = (
@@ -122,74 +135,58 @@ class CommandStrategy:
 
     @staticmethod
     async def TortureGame(cmd: Command):
-        guild = cmd.data.sender.
-        if guild is None:
+
+        if is_group_message(cmd):
+            user_nike = cmd.data.sender.nickname
+            user_name = user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
+            result = TortureGame.command_handler(
+                command=cmd.guide,
+                guild_id=str(cmd.data.group_id),
+                user_id=cmd.data.get_user_id(),
+                user_name=user_name,
+                args=cmd.args,
+                at_list=cmd.at_list,
+            )
+            await cmd.send(result)
+        else:
             await cmd.send("请在群组内使用该命令")
             return
-
-        user_nike = cmd.data.sender.nickname
-        user_name = (
-            user_nike
-            if user_nike
-            else f"Q号: {cmd.data.get_user_id()}"
-        )
-        result = TortureGame.command_handler(
-            command=cmd.guide,
-            guild_id=guild.id,
-            user_id=cmd.data.get_user_id(),
-            user_name=user_name,
-            args=cmd.args,
-            at_list=cmd.at_list,
-        )
-        await cmd.send(result)
 
     @staticmethod
     async def RouletteGameHandler(cmd: Command):
-        guild = cmd.data.guild
-        if guild is None:
+        if is_group_message(cmd):
+            user_nike = cmd.data.sender.nickname
+            user_name = user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
+            result = RouletteGame.command_handler(
+                command=cmd.guide,
+                guild_id=str(cmd.data.group_id),
+                user_id=cmd.data.get_user_id(),
+                user_name=user_name,
+                args=cmd.args,
+                at_list=cmd.at_list,
+            )
+            await cmd.send(result)
+        else:
             await cmd.send("请在群组内使用该命令")
             return
-
-        user_name = cmd.data.user.name
-        user_nike = cmd.data.member.nick if cmd.data.member else user_name
-        user_name = (
-            user_name
-            if user_name
-            else user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
-        )
-        result = RouletteGame.command_handler(
-            command=cmd.guide,
-            guild_id=guild.id,
-            user_id=cmd.data.get_user_id(),
-            user_name=user_name,
-            args=cmd.args,
-            at_list=cmd.at_list,
-        )
-        await cmd.send(result)
 
     @staticmethod
     async def BombDisposalGameHandler(cmd: Command):
-        guild = cmd.data.guild
-        if guild is None:
+        if is_group_message(cmd):
+            user_nike = cmd.data.sender.nickname
+            user_name = user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
+            result = BombDisposalGame.command_handler(
+                command=cmd.guide,
+                guild_id=str(cmd.data.group_id),
+                user_id=cmd.data.get_user_id(),
+                user_name=user_name,
+                args=cmd.args,
+                at_list=cmd.at_list,
+            )
+            await cmd.send(result)
+        else:
             await cmd.send("请在群组内使用该命令")
             return
-
-        user_name = cmd.data.user.name
-        user_nike = cmd.data.member.nick if cmd.data.member else user_name
-        user_name = (
-            user_name
-            if user_name
-            else user_nike if user_nike else f"Q号: {cmd.data.get_user_id()}"
-        )
-        result = BombDisposalGame.command_handler(
-            command=cmd.guide,
-            guild_id=guild.id,
-            user_id=cmd.data.get_user_id(),
-            user_name=user_name,
-            args=cmd.args,
-            at_list=cmd.at_list,
-        )
-        await cmd.send(result)
 
     @staticmethod
     async def CalculatorHandler(cmd: Command):
@@ -232,7 +229,6 @@ class CommandStrategy:
                 await cmd.send("命令错误，请输入`/cal h`查看帮助")
                 return
             args = re.split(r"(?:!|！)(?:,|，)", message)
-            ic("计算任务的参数:", args)
             expression = args[0]
             cal = Calculator(expression, cmd.bot, cmd.data, args[1:])
             # source = re.sub(r"^/(?:计算|cal)\s", "", cmd.data.message.content)
