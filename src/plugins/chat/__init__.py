@@ -142,7 +142,7 @@ async def handle_message(event: MessageEvent, args: Message = CommandArg()):
             if session_id in active_sessions:
                 del active_sessions[session_id]
             return_text = "已取消所有正在进行的聊天任务"
-        elif arg == "show_history":
+        elif arg == "show":
             chat = Chat.get_session(session_id, chat_type)["chat"]
             history = [
                 f"{i+1}. {msg['role']} {msg['content'][:10] + '...' if len(msg['content']) > 10 else msg['content']}"
