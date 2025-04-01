@@ -115,7 +115,6 @@ class CommandStrategy:
             await cmd.send(
                 Message()
                 + MessageSegment.at(cmd.data.get_user_id())
-                + MessageSegment.br()
                 + f"\n你的掷点结果是：{DiceAction(dices).result}"
             )
         else:
@@ -123,7 +122,7 @@ class CommandStrategy:
 
     @staticmethod
     async def TortureGame(cmd: Command):
-        guild = cmd.data.guild
+        guild = cmd.data.sender.
         if guild is None:
             await cmd.send("请在群组内使用该命令")
             return
