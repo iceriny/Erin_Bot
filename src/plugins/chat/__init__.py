@@ -65,6 +65,7 @@ async def on_task_error(session_id: str, task_id: str, error: str):
 @message_matcher.handle()
 async def handle_receive(event: MessageEvent):
     text = event.get_plaintext()
+    nike_name = event.sender.nickname if event.sender.nickname else event.get_user_id()
     if is_group_message(event):
         chat_type = "private" if text.startswith("%") else "group"
         session_id = (
@@ -72,6 +73,7 @@ async def handle_receive(event: MessageEvent):
         )
     else:
         chat_type = "private"
+        nike_name = None
         session_id = event.get_user_id()
 
     # 记录会话开始
@@ -89,7 +91,7 @@ async def handle_receive(event: MessageEvent):
                 return_text = await chat.chat("")  # 发送空消息触发响应
         else:
             # 启动异步聊天请求
-            return_text = await chat.chat(text)
+            return_text = await chat.chat(text, nike_name)
     except Exception as e:
         logger.error(f"处理消息异常: {e}")
         return_text = f"处理消息出错: {str(e)}"

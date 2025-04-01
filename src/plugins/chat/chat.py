@@ -22,7 +22,6 @@ class ChatEvent:
 
 
 class SessionInfo(TypedDict):
-    type: Literal["group", "private"]
     chat: "Chat"
     last_activity_time: float
 
@@ -47,8 +46,7 @@ class Chat:
     def get_session(cls, session_id: str, type: Literal["group", "private"]):
         if session_id not in cls._session_dictionary:
             cls._session_dictionary[session_id] = {
-                "type": type,
-                "chat": cls(session_id),
+                "chat": cls(session_id, type),
                 "last_activity_time": time.time(),
             }
         return cls._session_dictionary[session_id]
@@ -76,15 +74,30 @@ class Chat:
                     logger.error(f"Error cancelling task {task_id}: {e}")
         cls._task_pool.clear()
 
-    def __init__(self, session_id: str) -> None:
+    def __init__(self, session_id: str, type: Literal["group", "private"]) -> None:
         self.client = AsyncOpenAI(base_url=self.base_url, api_key=self.api_key)
         self.history = []
         self.session_id = session_id
         self.task_id = 0
+        self.type: Literal["group", "private"] = type
+        self._non_system_message_count = 0
 
-    async def chat(self, message: str) -> str:
+    async def chat(self, message: str, character: str | None = None) -> str:
         """创建聊天任务并添加到任务池"""
-        self.history.append({"role": "user", "content": message})
+        if self._non_system_message_count == 0 and self.type == "group":
+            self.send_system(
+                "这是在一个群聊中的多人对话, 不同的人有不同的昵称, 我会用`<昵称>:`作为不同人说话的前缀, 而你是参与这个多人对话中的一员"
+            )
+        if self.type == "group":
+            if message != "":
+                self.history.append(
+                    {"role": "user", "content": f"<{character}>: {message}"}
+                )
+                self._non_system_message_count += 1
+        else:
+            if message != "":
+                self.history.append({"role": "user", "content": message})
+                self._non_system_message_count += 1
 
         # 触发消息接收事件
         await Chat.on_message_received.trigger(self.session_id, message)
@@ -143,6 +156,7 @@ class Chat:
 
             # 添加到历史记录
             self.history.append({"role": "assistant", "content": result})
+            self._non_system_message_count += 1
             return result.strip()
 
         except Exception as e:
