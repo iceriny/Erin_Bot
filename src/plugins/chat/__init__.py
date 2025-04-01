@@ -88,7 +88,7 @@ async def handle_receive(event: MessageEvent):
     return_text = None
 
     try:
-        if text.startswith("system:"):
+        if text.startswith("system:") or text.startswith("system："):
             chat.send_system(text[7:])
             if text.endswith("$"):
                 # 创建系统消息后立即发送请求
@@ -129,7 +129,9 @@ async def handle_message(event: MessageEvent, args: Message = CommandArg()):
         return_text = "请输入关于AI的指令"
     elif len(_args) == 1:
         arg = _args[0]
-        if arg == "clean" or arg == "clear":
+        if arg == "help":
+            return_text = Chat.help()
+        elif arg == "clean" or arg == "clear":
             chat = Chat.get_session(session_id, chat_type)["chat"]
             chat.clear_history()
             return_text = "历史记录已清空"
