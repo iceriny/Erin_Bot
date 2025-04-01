@@ -22,6 +22,6 @@ command_matcher = on_command("cmd", priority=config.command_priority)
 
 @command_matcher.handle()
 async def handle_receive(bot: Bot, event: MessageEvent):
-    logger.debug(str(bot))
-    logger.debug(str(event))
+    logger.debug(bot.__repr__())
+    logger.debug(event.__repr__())
     await command_matcher.finish()
