@@ -27,13 +27,15 @@ class Bomb_disposal_player:
             return f"「 {self.profession} 」{self.__name}"
         return self.__name
 
-    def __skill_for_None(self, _game: "BombDisposalGame", _arg: str|None = None):
+    def __skill_for_None(self, _game: "BombDisposalGame", _arg: str | None = None):
         return f"{self.name} ⚠️ 玩家没有技能，无法使用技能。"
 
-    def __skill_for_violent(self, _game: "BombDisposalGame", _arg: str|None = None):
+    def __skill_for_violent(self, _game: "BombDisposalGame", _arg: str | None = None):
         return f"{self.name} ✅ 技能激活，现在{self.__name}在下一次拆弹可以拆掉最大100长度的引线了。"
 
-    def __skill_for_quality_inspector(self, game: "BombDisposalGame", _arg: str|None = None):
+    def __skill_for_quality_inspector(
+        self, game: "BombDisposalGame", _arg: str | None = None
+    ):
         max_fuse = game.max_fuse
         distance = max_fuse - game.fuse_limit[0]
         quality = distance / (game.fuse_limit[1] - game.fuse_limit[0])
@@ -50,7 +52,9 @@ class Bomb_disposal_player:
             quality_desc = "完美的"
         return f"{self.name} ✅ 发动了技能，你们面前的炸弹，算是个{quality_desc}炸弹。"
 
-    def __skill_for_observer(self, game: "BombDisposalGame", _arg: str|None = None) -> str:
+    def __skill_for_observer(
+        self, game: "BombDisposalGame", _arg: str | None = None
+    ) -> str:
         fuse = game.fuse
         schedule = fuse / game.max_fuse
         schedule_desc = ""
@@ -66,14 +70,17 @@ class Bomb_disposal_player:
             schedule_desc = "才刚刚开始呢!"
         return f"{self.name} ✅ 发动了技能，你们面前的炸弹{schedule_desc}"
 
-    def __skill_for_reloader(self, game: "BombDisposalGame", _arg: str|None = None):
+    def __skill_for_reloader(self, game: "BombDisposalGame", _arg: str | None = None):
         game.fuse += int(game.max_fuse * 0.2)
         return f"{self.name} ✅ 发动了技能，别人拆弹你装弹? 引信长度增加了20%(相对于初始引信的长度)。"
-    def __skill_for_stabler(self, game: "BombDisposalGame", _arg: str|None = None) -> str:
+
+    def __skill_for_stabler(
+        self, game: "BombDisposalGame", _arg: str | None = None
+    ) -> str:
         game.stable = True
         return f"{self.name} ✅ 发动了技能，炸弹保持稳固状态一回合。"
 
-    def __skill_for_commander(self, game: "BombDisposalGame", _arg: str|None ) -> str:
+    def __skill_for_commander(self, game: "BombDisposalGame", _arg: str | None) -> str:
         if _arg is None:
             return f"{self.name} ⚠️ 发动技能但没有指定数值。"
         correction_value = 0
@@ -85,13 +92,10 @@ class Bomb_disposal_player:
         return f"{self.name} ✅ 发动了技能，下回合的玩家将听从指挥将数值增加或减少对应的值。"
 
     professions: dict[str | None, Profession] = {
-        None: {
-            "desc": "平民",
-            "skill": __skill_for_None
-        },
+        None: {"desc": "平民", "skill": __skill_for_None},
         "暴力拆弹专家": {
             "desc": "暴力拆弹专家，可将下次最大拆除引信调整为100。",
-            "skill": __skill_for_violent
+            "skill": __skill_for_violent,
         },
         "质检官": {
             "desc": "质检员，可查看炸弹引信粗略的最大长度。",
@@ -111,11 +115,11 @@ class Bomb_disposal_player:
         },
         "指挥官": {
             "desc": "指挥官，可以指定下回合的玩家的输入数值 加或减 1~10。",
-            "skill" : __skill_for_commander
+            "skill": __skill_for_commander,
         },
     }
 
-    def activate_skill(self, game: "BombDisposalGame", arg: str|None = None) -> str:
+    def activate_skill(self, game: "BombDisposalGame", arg: str | None = None) -> str:
         if not self.profession:
             return "⚠️ 玩家没有职业，无法使用技能。"
         else:
@@ -172,8 +176,7 @@ class BombDisposalGame:
         if player_id in [p.id for p in self.players_list]:
             return
         self.players_list.append(
-            Bomb_disposal_player(player_name, player_id,
-                                 len(self.players_list))
+            Bomb_disposal_player(player_name, player_id, len(self.players_list))
         )
 
     def remove_player(self, player_id: str) -> None:
@@ -218,16 +221,21 @@ class BombDisposalGame:
         "boom": "{name}直接触碰了核心机关，这会发生....BOOOOM!!!~ ({name}直接导致炸弹爆炸了。)",
         "intense": "{name}不小心触碰到了什么机关，炸弹引信飞速的燃烧了很多! ({name}实际产生的数值扩大了2倍)",
         "halved": "{name}小心翼翼的...也太小心了叭?! (实际产生的数值是{name}想要的二分之一)",
-        "big random": "{name}专注的处理着炸弹，但...一个没站好，差点摔倒了，当然就没看到自己到底按到了什么。({name}的数值产生了大量的误差)"
+        "big random": "{name}专注的处理着炸弹，但...一个没站好，差点摔倒了，当然就没看到自己到底按到了什么。({name}的数值产生了大量的误差)",
     }
 
-    def play(self, width: int) -> tuple[None, Literal[False]] | tuple[Bomb_disposal_player, bool]:
+    def play(
+        self, width: int
+    ) -> tuple[None, Literal[False]] | tuple[Bomb_disposal_player, bool]:
         if len(self.players_list) == 0:
             return None, False
 
         current_player = self.players_list[self.current_index]
 
-        if current_player.profession == "暴力拆弹专家" and current_player.skill_activated:
+        if (
+            current_player.profession == "暴力拆弹专家"
+            and current_player.skill_activated
+        ):
             width = max(1, min(width, 100))
             current_player.skill_activated = False
         else:
@@ -240,8 +248,7 @@ class BombDisposalGame:
             __width, __desc = event_result
             desc = ""
             for d in __desc:
-                desc += "\n" + \
-                    self.Events_desc[d].format(name=current_player.name)
+                desc += "\n" + self.Events_desc[d].format(name=current_player.name)
 
         current_player.triggered_event = desc
         current_player.width = __width
@@ -313,7 +320,8 @@ class BombDisposalGame:
         professional_number = len(self.players_list) // 4
         professional_players = self.get_random_players(professional_number)
         profession_list = [
-            p for p in Bomb_disposal_player.professions.keys() if p != None]
+            p for p in Bomb_disposal_player.professions.keys() if p != None
+        ]
         for i in range(professional_number):
             if len(profession_list) == 0:
                 break
@@ -357,20 +365,24 @@ class BombDisposalGame:
                 return CMDResult("游戏中没有参与的玩家，请先加入游戏")
             elif result:
                 return CMDResult(
-                    (f"---"
-                     f"{player.triggered_event}\n"
-                      "---\n"
-                     f"{player.name}拆除了{player.width}! 💥BOOOOOOOOOOM💥 炸弹爆炸了!\n\n"
-                     f"新的排名是:\n {game.get_players_str()}"),
+                    (
+                        f"---"
+                        f"{player.triggered_event}\n"
+                        "---\n"
+                        f"{player.name}拆除了{player.width}! 💥BOOOOOOOOOOM💥 炸弹爆炸了!\n\n"
+                        f"新的排名是:\n {game.get_players_str()}"
+                    ),
                     [player.id],
                 )
             else:
                 return CMDResult(
-                    ("---"
-                    f"{player.triggered_event}\n"
-                     "---\n"
-                    f"{player.name}拆除了{player.width}\n"
-                     "下一位: "),
+                    (
+                        "---"
+                        f"{player.triggered_event}\n"
+                        "---\n"
+                        f"{player.name}拆除了{player.width}\n"
+                        "下一位: "
+                    ),
                     [game.players_list[game.current_index].id],
                 )
 
@@ -382,7 +394,9 @@ class BombDisposalGame:
                 return CMDResult("你没有参与游戏!")
             if try_get_player.profession == None:
                 return CMDResult("你还没有职业，无法发动技能!")
-            desc = try_get_player.activate_skill(game, args[0] if len(args) > 0 else None)
+            desc = try_get_player.activate_skill(
+                game, args[0] if len(args) > 0 else None
+            )
             return CMDResult(desc)
 
         elif command == "加入":
@@ -403,7 +417,9 @@ class BombDisposalGame:
             if current_player is None:
                 return CMDResult("游戏没有参与者")
 
-            return CMDResult(game.get_players_str() + "\n当前回合玩家: " + current_player.name)
+            return CMDResult(
+                game.get_players_str() + "\n当前回合玩家: " + current_player.name
+            )
 
         elif command == "跳过":
             if not game:
@@ -427,8 +443,10 @@ class BombDisposalGame:
                     return CMDResult(f"{at['name']}都没参加游戏你踢别人干嘛?")
                 game.remove_player(at["id"])
             return CMDResult(
-                (f"{'、'.join([player['name'] if player['name'] else '未知名称' for player in at_list])} 被踢出游戏。\n"
-                 f"当前游戏人数: \n{len(game.players_list)}")
+                (
+                    f"{'、'.join([player['name'] if player['name'] else '未知名称' for player in at_list])} 被踢出游戏。\n"
+                    f"当前游戏人数: \n{len(game.players_list)}"
+                )
             )
 
         elif command == "离开":
@@ -449,11 +467,11 @@ class BombDisposalGame:
 
         elif command == "身份":
             profession_list = (
-                p for p in Bomb_disposal_player.professions.keys() if p != None)
+                p for p in Bomb_disposal_player.professions.keys() if p != None
+            )
             result = "身份介绍:\n"
             for p in profession_list:
-                result += f"{p}: {
-                    Bomb_disposal_player.professions[p]['desc']}\n"
+                result += f"{p}: {Bomb_disposal_player.professions[p]['desc']}\n"
             return CMDResult(result)
 
         elif command == "设置":
