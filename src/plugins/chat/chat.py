@@ -1,6 +1,6 @@
 import time
 import asyncio
-from typing import TypedDict, Dict, List, Callable, Awaitable, Optional, Any
+from typing import TypedDict, Dict, List, Callable, Awaitable, Literal, Any
 from openai import AsyncOpenAI
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 import nonebot
@@ -22,6 +22,7 @@ class ChatEvent:
 
 
 class SessionInfo(TypedDict):
+    type: Literal["group", "private"]
     chat: "Chat"
     last_activity_time: float
 
@@ -43,9 +44,10 @@ class Chat:
     on_task_error = ChatEvent("task_error")
 
     @classmethod
-    def get_session(cls, session_id: str):
+    def get_session(cls, session_id: str, type: Literal["group", "private"]):
         if session_id not in cls._session_dictionary:
             cls._session_dictionary[session_id] = {
+                "type": type,
                 "chat": cls(session_id),
                 "last_activity_time": time.time(),
             }

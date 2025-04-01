@@ -64,15 +64,21 @@ async def on_task_error(session_id: str, task_id: str, error: str):
 
 @message_matcher.handle()
 async def handle_receive(event: MessageEvent):
-
     text = event.get_plaintext()
-    session_id = event.get_session_id()
+    if is_group_message(event):
+        chat_type = "private" if text.startswith("%") else "group"
+        session_id = (
+            event.get_user_id() if chat_type == "private" else str(event.group_id)
+        )
+    else:
+        chat_type = "private"
+        session_id = event.get_user_id()
 
     # 记录会话开始
     if session_id not in active_sessions:
         active_sessions[session_id] = {"status": "new"}
 
-    chat = Chat.get_session(session_id)["chat"]
+    chat = Chat.get_session(session_id, chat_type)["chat"]
     return_text = None
 
     try:
@@ -97,30 +103,42 @@ async def handle_receive(event: MessageEvent):
 
 @command_matcher.handle()
 async def handle_message(event: MessageEvent, args: Message = CommandArg()):
-    user = event.get_session_id()
     _args = args.extract_plain_text().strip().split()
+    if is_group_message(event):
+        chat_type = "private" if _args[-1] == "me" else "group"
+        session_id = (
+            event.get_user_id() if chat_type == "private" else str(event.group_id)
+        )
+    else:
+        chat_type = "private"
+        session_id = event.get_user_id()
+
     return_text = ""
+
+    # 如果是群聊且最后一个参数是"me"，则剥离最后一个参数`me`
+    if is_group_message(event) and _args[-1] == "me":
+        _args = _args[:-1]
 
     if len(_args) == 0:
         return_text = "请输入关于AI的指令"
     elif len(_args) == 1:
         arg = _args[0]
         if arg == "clean" or arg == "clear":
-            chat = Chat.get_session(user)["chat"]
+            chat = Chat.get_session(session_id, chat_type)["chat"]
             chat.clear_history()
             return_text = "历史记录已清空"
         elif arg == "status":
             # 查看当前会话状态
-            if user in active_sessions:
-                status = active_sessions[user]["status"]
+            if session_id in active_sessions:
+                status = active_sessions[session_id]["status"]
                 return_text = f"当前会话状态: {status}"
             else:
                 return_text = "当前没有活动会话"
         elif arg == "cancel":
             # 取消当前任务
             await Chat.cancel_all_tasks()
-            if user in active_sessions:
-                del active_sessions[user]
+            if session_id in active_sessions:
+                del active_sessions[session_id]
             return_text = "已取消所有正在进行的聊天任务"
 
     await command_matcher.finish(return_text)
