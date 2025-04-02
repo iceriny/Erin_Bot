@@ -1,7 +1,7 @@
 from nonebot.plugin import PluginMetadata
 from nonebot.rule import Rule
 from nonebot.log import logger
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot import get_plugin_config, on_command, on_message, get_driver
 from nonebot.params import CommandArg
 from typing import Dict, Any
@@ -158,6 +158,13 @@ async def handle_message(event: MessageEvent, args: Message = CommandArg()):
                 return_text = "\n".join(history)
             else:
                 return_text = "历史记录为空"
+    elif len(_args) == 2:
+        if _args[0] == "setModel":
+            if event.get_user_id() == "1179629081":
+                Chat.set_model(_args[1])
+                return_text = f"已设置模型为{_args[1]}"
+            else:
+                return_text = "权限不足"
 
     await command_matcher.finish(return_text)
 

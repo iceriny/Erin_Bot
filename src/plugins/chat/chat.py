@@ -40,6 +40,7 @@ class Chat:
     api_key = nonebot.get_driver().config.siliconflow_api_key
     _session_dictionary: SessionDict = {}
     _task_pool: Dict[str, asyncio.Task] = {}
+    _model: str = "deepseek-ai/DeepSeek-V3"
 
     # 事件定义
     on_message_received = ChatEvent("message_received")
@@ -47,6 +48,14 @@ class Chat:
     on_response_chunk = ChatEvent("response_chunk")
     on_task_complete = ChatEvent("task_complete")
     on_task_error = ChatEvent("task_error")
+
+    @classmethod
+    def set_model(cls, model: str):
+        cls._model = model
+
+    @classmethod
+    def get_model(cls) -> str:
+        return cls._model
 
     @classmethod
     def get_session(cls, session_id: str, type: Literal["group", "private"]):
@@ -141,7 +150,7 @@ class Chat:
         result = ""
         try:
             response = await self.client.chat.completions.create(
-                model="Qwen/QwQ-32B",
+                model=Chat.get_model(),
                 messages=self.history,
                 stream=True,  # 启用流式输出
             )
