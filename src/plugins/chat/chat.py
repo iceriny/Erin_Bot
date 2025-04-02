@@ -10,6 +10,7 @@ from nonebot import require
 require("nonebot_plugin_apscheduler")
 
 from nonebot_plugin_apscheduler import scheduler
+from src.plugins.chat.constant import GROUP_SYSTEM_PROMPT
 
 
 class ChatEvent:
@@ -90,9 +91,7 @@ class Chat:
     async def chat(self, message: str, character: str | None = None) -> str:
         """创建聊天任务并添加到任务池"""
         if self._non_system_message_count == 0 and self.type == "group":
-            self.send_system(
-                "这是在一个群聊中的多人对话,不同的人有不同的昵称,我会用`<昵称>:`作为不同人说话的前缀,而你是参与这个多人对话中的一员,但是你不用附带昵称输出,直接说出你的要说的话即可"
-            )
+            self.send_system(GROUP_SYSTEM_PROMPT)
         if self.type == "group":
             if message != "":
                 self.history.append(
