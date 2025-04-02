@@ -155,13 +155,15 @@ class Chat:
                         self.session_id, chunk_message, result
                     )
 
+            result = result.strip()
+
             # 触发响应完成事件
             await Chat.on_response_received.trigger(self.session_id, result)
 
             # 添加到历史记录
             self.history.append({"role": "assistant", "content": result})
             self._non_system_message_count += 1
-            return result.strip()
+            return result
 
         except Exception as e:
             logger.error(f"API request failed: {e}")
