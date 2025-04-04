@@ -151,13 +151,14 @@ async def handle_message(event: MessageEvent, args: Message = CommandArg()):
         elif arg == "show":
             chat = Chat.get_session(session_id, chat_type)["chat"]
             history = [
-                f"{i+1}. {msg['role']} {msg['content'][:10] + '...' if len(msg['content']) > 10 else msg['content']}"
+                f"{i+1}. {msg['role']} {msg['content'][:20] + '...' if len(msg['content']) > 10 else msg['content']}"
                 for i, msg in enumerate(chat.history)
             ]
             if history:
                 return_text = "\n".join(history)
             else:
                 return_text = "历史记录为空"
+            return_text += f"\n当前模型: {Chat.get_model()}"
     elif len(_args) == 2:
         if _args[0] == "setModel":
             if event.get_user_id() == "1179629081":
