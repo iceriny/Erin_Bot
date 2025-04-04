@@ -10,7 +10,7 @@ from nonebot import require
 require("nonebot_plugin_apscheduler")
 
 from nonebot_plugin_apscheduler import scheduler
-from src.plugins.chat.constant import GROUP_SYSTEM_PROMPT
+from src.plugins.chat.constant import GROUP_SYSTEM_PROMPT, GROUP_SYSTEM_PROMPT_CUSTOMIZE
 
 
 class ChatEvent:
@@ -100,7 +100,11 @@ class Chat:
     async def chat(self, message: str, character: str | None = None) -> str:
         """创建聊天任务并添加到任务池"""
         if self._non_system_message_count == 0 and self.type == "group":
-            self.send_system(GROUP_SYSTEM_PROMPT)
+            if message.startswith("@"):
+                message = message[1:]
+                self.send_system(GROUP_SYSTEM_PROMPT_CUSTOMIZE.format(identity=message))
+            else:
+                self.send_system(GROUP_SYSTEM_PROMPT)
         if self.type == "group":
             if message != "":
                 self.history.append(
@@ -199,6 +203,7 @@ class Chat:
 ## ai的特殊使用规则:
 - 在群聊中直接at机器人然后说话, ai会在公共环境下聊天, 即大家一起聊天
 - 在群聊中, 如果你at她, 但是前面加上`%`, 则是私有频道(只有你和ai, 和公共频道互不干扰)
+- 在群聊中, 机器人有默认的人设, 如果你想自定义人设, 请使用`system:@`作为前缀
 - 私有频道和私聊中你与ai的聊天同步, 也就是说, 如果你开始在群里用私有频道和ai聊, 然后来群里at机器人, 使用私有频道(前缀符号"%")继续聊则共享历史, 反之亦然
 - 你和ai对话时,如果前缀`system:`, 则发送给ai`system` role 的信息, 一般用作提示词, 默认不会直接发送
 - 如果你在发送`system`信息时, 后缀了符号:"$", 则将system直接发给ai,ai会有对应的回复
